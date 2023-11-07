@@ -3,7 +3,7 @@
 name: Terminate EC2 instance
 
 on:
-  workflow_run:
+  workflow_dispatch:
     workflows: ["ec2create.yml"]
     types:
       - completed
