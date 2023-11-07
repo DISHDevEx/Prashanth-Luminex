@@ -42,4 +42,11 @@ jobs:
             --iam-instance-profile Name=${{ secrets.IAM_INSTANCE_PROFILE }} \
             --count 1 \
             --no-verify-ssl &>/dev/null
+      # ... your existing steps ...
+
+      - name: Save EC2 instance ID as an artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ec2-instance-id
+          path: /tmp/ec2-instance-id.txt
 

@@ -15,6 +15,12 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
 
+      - name: Download EC2 instance ID artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: ec2-instance-id
+          path: /tmp
+
       - name: Configure AWS credentials for EC2 termination
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -22,10 +28,10 @@ jobs:
           role-session-name: samplerolesession
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Terminate EC2 instance
+      - name: Read EC2 instance ID from artifact
         run: |
-          # Retrieve the EC2 instance ID from the output of the "Create new EC2 instance" workflow
-          instance_id=$(echo "${{ github.event.workflow_run.event }}")  # Adjust this to extract the instance ID
+          # Read the EC2 instance ID from the file
+          instance_id=$(cat /tmp/ec2-instance-id/ec2-instance-id.txt)
 
           if [[ -n "$instance_id" ]]; then
             aws ec2 terminate-instances --instance-ids $instance_id
