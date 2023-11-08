@@ -44,9 +44,9 @@ jobs:
             --no-verify-ssl &>/dev/null
       # ... your existing steps ...
 
-      - name: Save EC2 instance ID as an artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ec2-instance-id
-          path: /tmp/ec2-instance-id.txt
+      # - name: Save EC2 instance ID as an artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ec2-instance-id
+      #     path: /tmp/ec2-instance-id.txt
 
