@@ -1,33 +1,30 @@
-# This workflow is used to terminate an existing EC2 instance
-
-name: Terminate EC2 instance
+name: Terminate EC2 Instance
 
 on:
   workflow_dispatch:
-    workflows: ["ec2create.yml"]
-    types:
-      - completed
+    inputs:
+      instance_id:
+        description: 'Enter instance_id of the EC2 to terminate'
+        required: true
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
 
 jobs:
-  terminate:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials for EC2 termination
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
           role-session-name: samplerolesession
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Get EC2 instance ID
-        id: ec2
-        run: |
-          # Use the AWS CLI to get the EC2 instance ID based on your filtering criteria
-          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=github_wf_${{ github.event.inputs.ec2_name }}" --query "Reservations[0].Instances[0].InstanceId" --output text)
-          echo "::set-output name=instance_id::$instance_id"
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Terminate EC2 instance
-        if: steps.ec2.outputs.instance_id != ''
         run: |
-          # Use the instance_id variable from the previous step to terminate the EC2 instance
-          aws ec2 terminate-instances --instance-ids ${{ steps.ec2.outputs.instance_id }}
+          aws ec2 terminate-instances --instance-ids ${{ inputs.instance_id }} --region ${{ env.AWS_REGION }}
+
