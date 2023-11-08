@@ -31,7 +31,7 @@ jobs:
       - name: Read EC2 instance ID from artifact
         run: |
           # Read the EC2 instance ID from the file
-          instance_id=$(cat /tmp/ec2-instance-id/ec2-instance-id.txt)
+          instance_id=$(cat /tmp/ec2-instance-id.txt)
 
           if [[ -n "$instance_id" ]]; then
             aws ec2 terminate-instances --instance-ids $instance_id
