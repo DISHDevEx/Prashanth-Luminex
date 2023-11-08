@@ -12,15 +12,6 @@ jobs:
   terminate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v2
-
-      - name: Download EC2 instance ID artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: ec2-instance-id
-          path: /tmp
-
       - name: Configure AWS credentials for EC2 termination
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -28,13 +19,16 @@ jobs:
           role-session-name: samplerolesession
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Read EC2 instance ID from artifact
+      - name: Get EC2 instance ID
+        id: ec2
         run: |
-          # Read the EC2 instance ID from the file
-          instance_id=$(cat /tmp/ec2-instance-id.txt)
+          # Use the AWS CLI to get the EC2 instance ID based on your filtering criteria
+          instance_id=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=github_wf_${{ github.event.inputs.ec2_name }}" --query "Reservations[0].Instances[0].InstanceId" --output text)
+          echo "::set-output name=instance_id::$instance_id"
 
-          if [[ -n "$instance_id" ]]; then
-            aws ec2 terminate-instances --instance-ids $instance_id
-          else
-            echo "EC2 instance ID not found."
-          fi
+      - name: Terminate EC2 instance
+        if: steps.ec2.outputs.instance_id != ''
+        run: |
+          # Use the instance_id variable from the previous step to terminate the EC2 instance
+          aws ec2 terminate-instances --instance-ids ${{ steps.ec2.outputs.instance_id }}
+
