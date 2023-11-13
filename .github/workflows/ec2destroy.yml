@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       instance_id:
-        description: 'Enter instance_id of the EC2 to terminate'
+        description: 'EC2 instance id to terminate'
         required: true
 
 env:
